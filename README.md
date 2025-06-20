@@ -32,6 +32,74 @@ pip install XClientTransaction -U --no-cache-dir
 python quickstart.py
 ```
 
+## JavaScript Usage
+
+Install dependencies and build a browser bundle:
+
+```bash
+npm install
+npm run build
+```
+
+The `dist/xclienttransaction.js` file exposes a global `XClientTransaction` object. Include it in a web page:
+
+```html
+<script src="dist/xclienttransaction.js"></script>
+<script>
+  // homeHtml and ondemandJs must contain the raw page source
+  // from https://x.com and its ondemand script
+  const ct = new XClientTransaction.ClientTransaction(homeHtml, ondemandJs);
+  console.log(ct.generateTransactionId('GET', '/test'));
+</script>
+```
+
+When using Node.js you can import the ES module directly:
+
+```javascript
+import { ClientTransaction } from './js_client_transaction/index.js';
+```
+
+### Fetching `homeHtml` and `ondemandJs`
+
+In both environments you must retrieve the HTML for `https://x.com` and the
+`ondemand.s.*.js` file referenced in that page. Examples for Node.js and the
+browser are shown below.
+
+#### Node.js
+
+```javascript
+import fetch from 'node-fetch'; // Node 18+ has global fetch
+import {
+  getOndemandFileUrl,
+  generateHeaders
+} from './js_client_transaction/utils.js';
+
+const headers = generateHeaders();
+const homeHtml = await (await fetch('https://x.com', { headers })).text();
+const ondemandUrl = getOndemandFileUrl(homeHtml);
+const ondemandJs = await (await fetch(ondemandUrl, { headers })).text();
+```
+
+#### Browser
+
+```html
+<script type="module">
+  import {
+    getOndemandFileUrl,
+    generateHeaders
+  } from './js_client_transaction/utils.js';
+
+  const headers = new Headers(generateHeaders());
+  const homeHtml = await (await fetch('https://x.com', { headers })).text();
+  const ondemandUrl = getOndemandFileUrl(homeHtml);
+  const ondemandJs = await (await fetch(ondemandUrl)).text();
+  // Use these values when constructing ClientTransaction
+</script>
+```
+
+Direct browser requests may be blocked by CORS. Consider proxying the requests
+through a server if needed.
+
 ## Get x.com Home Page and ondemand.s File Response
 
 #### Synchronous Version
