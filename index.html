@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClientTransaction.js Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .log {
+            background: #1e1e1e;
+            color: #f0f0f0;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .success { color: #28a745; }
+        .error { color: #dc3545; }
+        .info { color: #17a2b8; }
+        .section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        textarea {
+            width: 100%;
+            min-height: 100px;
+            font-family: 'Courier New', monospace;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        h3 {
+            margin-top: 0;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <h1>ClientTransaction.js Test</h1>
+    
+    <div class="container">
+        <div class="section">
+            <h3>Home Page Response</h3>
+            <textarea id="homePageResponse" class="json-input">
+<html><head>
+<meta name="twitter-site-verification" content="YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4">
+</head><body>
+<div id="loading-x-anim-0"><svg><path d="M0 0C10 20 30 40 50 60C70 80 90 100 110 120"></path></svg></div>
+<div id="loading-x-anim-1"><svg><path d="M0 0C1 2 3 4 5 6C7 8 9 10 11 12"></path></svg></div>
+<div id="loading-x-anim-2"><svg><path d="M0 0C2 4 6 8 10 12C14 16 18 20 22 24"></path></svg></div>
+<div id="loading-x-anim-3"><svg><path d="M0 0C3 6 9 12 15 18C21 24 27 30 33 36"></path></svg></div>
+</body></html>
+            </textarea>
+        </div>
+        
+        <div class="section">
+            <h3>On-Demand File Response</h3>
+            <textarea id="ondemandFileResponse" class="json-input">
+function test(a){return (a[5], 16) + (a[9], 16) + (a[15], 16);}
+            </textarea>
+        </div>
+        
+        <div class="section">
+            <h3>Test Controls</h3>
+            <div>
+                <button id="initBtn">Initialize ClientTransaction</button>
+                <button id="generateIdBtn" disabled>Generate Transaction ID</button>
+            </div>
+            
+            <div style="margin-top: 15px;">
+                <label for="method">HTTP Method:</label>
+                <select id="method" style="padding: 5px; margin: 0 10px;">
+                    <option value="GET">GET</option>
+                    <option value="POST">POST</option>
+                    <option value="PUT">PUT</option>
+                    <option value="DELETE">DELETE</option>
+                </select>
+                
+                <label for="path" style="margin-left: 10px;">Path:</label>
+                <input type="text" id="path" value="/api/endpoint" style="padding: 5px; width: 200px;">
+            </div>
+        </div>
+        
+        <div class="section">
+            <h3>Console Log</h3>
+            <div id="consoleLog" class="log">[SYSTEM] Ready to test ClientTransaction.js
+            </div>
+        </div>
+    </div>
+
+    <!-- Load the ClientTransaction library -->
+    <script src="dist/xclienttransaction.js"></script>
+    
+    <script>
+        // DOM elements
+        const initBtn = document.getElementById('initBtn');
+        const generateIdBtn = document.getElementById('generateIdBtn');
+        const homePageResponseInput = document.getElementById('homePageResponse');
+        const ondemandFileResponseInput = document.getElementById('ondemandFileResponse');
+        const methodInput = document.getElementById('method');
+        const pathInput = document.getElementById('path');
+        const consoleLog = document.getElementById('consoleLog');
+        
+        let clientTransaction = null;
+        
+        // Log function to display messages in the console log
+        function log(message, type = 'info') {
+            const timestamp = new Date().toISOString();
+            const logEntry = document.createElement('div');
+            logEntry.className = type;
+            logEntry.textContent = `[${timestamp}] ${message}`;
+            consoleLog.appendChild(logEntry);
+            consoleLog.scrollTop = consoleLog.scrollHeight;
+            
+            // Also log to browser console
+            if (type === 'error') {
+                console.error(message);
+            } else if (type === 'success') {
+                console.log('%c' + message, 'color: green');
+            } else {
+                console.log(message);
+            }
+        }
+        
+        // Parse JSON with error handling
+        function parseJson(input, name) {
+            try {
+                return JSON.parse(input);
+            } catch (e) {
+                log(`Error parsing ${name}: ${e.message}`, 'error');
+                return null;
+            }
+        }
+        
+        // Initialize ClientTransaction
+        initBtn.addEventListener('click', () => {
+            try {
+                const homePageResponse = parseJson(homePageResponseInput.value, 'home page response');
+                const ondemandFileResponse = parseJson(ondemandFileResponseInput.value, 'on-demand file response');
+                
+                if (!homePageResponse || !ondemandFileResponse) {
+                    return;
+                }
+                
+                log('Initializing ClientTransaction...');
+                
+                // Create a new ClientTransaction instance with stringified responses
+                clientTransaction = new XClientTransaction.ClientTransaction(
+                    JSON.stringify(homePageResponse),
+                    JSON.stringify(ondemandFileResponse)
+                );
+                
+                log('ClientTransaction initialized successfully!', 'success');
+                log(`Random keyword: ${clientTransaction.randomKeyword}`);
+                log(`Random number: ${clientTransaction.randomNumber}`);
+                log(`Row index: ${clientTransaction.rowIndex}`);
+                log(`Key bytes indices: ${clientTransaction.keyBytesIndices.join(', ')}`);
+                
+                // Enable the generate ID button
+                generateIdBtn.disabled = false;
+                
+            } catch (error) {
+                log(`Error initializing ClientTransaction: ${error.message}`, 'error');
+                console.error(error);
+            }
+        });
+        
+        // Generate Transaction ID
+        generateIdBtn.addEventListener('click', () => {
+            if (!clientTransaction) {
+                log('Please initialize ClientTransaction first', 'error');
+                return;
+            }
+            
+            try {
+                const method = methodInput.value;
+                const path = pathInput.value;
+                
+                log(`Generating transaction ID for ${method} ${path}...`);
+                
+                const transactionId = clientTransaction.generateTransactionId(
+                    method,
+                    path
+                );
+                
+                log(`Generated Transaction ID: ${transactionId}`, 'success');
+                
+            } catch (error) {
+                log(`Error generating transaction ID: ${error.message}`, 'error');
+                console.error(error);
+            }
+        });
+        
+        log('Test page loaded. Click "Initialize ClientTransaction" to begin.');
+    </script>
+</body>
+</html>
