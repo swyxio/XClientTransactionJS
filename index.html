@@ -158,32 +158,35 @@ function test(a){return (a[5], 16) + (a[9], 16) + (a[15], 16);}
             }
         }
         
-        // Parse JSON with error handling
-        function parseJson(input, name) {
+        // Parse input, handling both JSON and plain text/HTML
+        function parseInput(input, name) {
+            // First try to parse as JSON
             try {
                 return JSON.parse(input);
             } catch (e) {
-                log(`Error parsing ${name}: ${e.message}`, 'error');
-                return null;
+                // If it's not JSON, return the input as is
+                log(`Using raw ${name} (not JSON)`, 'info');
+                return input;
             }
         }
         
         // Initialize ClientTransaction
         initBtn.addEventListener('click', () => {
             try {
-                const homePageResponse = parseJson(homePageResponseInput.value, 'home page response');
-                const ondemandFileResponse = parseJson(ondemandFileResponseInput.value, 'on-demand file response');
+                const homePageResponse = homePageResponseInput.value.trim();
+                const ondemandFileResponse = ondemandFileResponseInput.value.trim();
                 
                 if (!homePageResponse || !ondemandFileResponse) {
+                    log('Both home page and on-demand file responses are required', 'error');
                     return;
                 }
                 
                 log('Initializing ClientTransaction...');
                 
-                // Create a new ClientTransaction instance with stringified responses
+                // Create a new ClientTransaction instance with the raw responses
                 clientTransaction = new XClientTransaction.ClientTransaction(
-                    JSON.stringify(homePageResponse),
-                    JSON.stringify(ondemandFileResponse)
+                    homePageResponse,
+                    ondemandFileResponse
                 );
                 
                 log('ClientTransaction initialized successfully!', 'success');
