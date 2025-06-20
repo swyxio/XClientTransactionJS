@@ -10,7 +10,7 @@ __pycache__/
 .Python
 build/
 develop-eggs/
-dist/
+!dist/
 downloads/
 eggs/
 .eggs/
@@ -151,6 +151,10 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+
+# Node
+node_modules/
+package-lock.json
 
 # PyCharm
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
