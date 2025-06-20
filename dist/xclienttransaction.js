@@ -569,6 +569,7 @@ var XClientTransaction = (() => {
     base64Encode: () => base64Encode,
     floatToHex: () => floatToHex,
     generateHeaders: () => generateHeaders,
+    getOndemandFileUrl: () => getOndemandFileUrl,
     isOdd: () => isOdd
   });
 
@@ -648,6 +649,8 @@ var XClientTransaction = (() => {
   // js_client_transaction/constants.js
   var ADDITIONAL_RANDOM_NUMBER = 3;
   var DEFAULT_KEYWORD = "obfiowerehiring";
+  var ON_DEMAND_FILE_URL = "https://abs.twimg.com/responsive-web/client-web/ondemand.s.{filename}a.js";
+  var ON_DEMAND_FILE_REGEX = /['"]ondemand\.s['"]:\s*['"]([\w]*)['"]/m;
   var INDICES_REGEX = /(\(\w\[(\d{1,2})\],\s*16\))/g;
 
   // js_client_transaction/utils.js
@@ -675,6 +678,11 @@ var XClientTransaction = (() => {
     if (typeof response !== "string") {
       throw new TypeError(`the response object must be string, not ${typeof response}`);
     }
+  }
+  function getOndemandFileUrl(html) {
+    const match = ON_DEMAND_FILE_REGEX.exec(html);
+    if (!match) return null;
+    return ON_DEMAND_FILE_URL.replace("{filename}", match[1]);
   }
   function floatToHex(x) {
     let result = [];
