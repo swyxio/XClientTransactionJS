@@ -1,0 +1,5 @@
+# Ignore test fixtures and non-essential files
+*.log
+.DS_Store
+# keep README, LICENSE automatically
+# We include js_client_transaction and dist via package.json "files"

@@ -1,36 +1,47 @@
 <h1 align="center">X-Client-Transaction-ID</h1>
 
 <p align="center">
-Twitter X-Client-Transaction-Id generator written in python.
+JavaScript implementation of Twitter/X's Client-Transaction-ID generator for API requests.
 
 <p align="center">
 <a href="https://choosealicense.com/licenses/mit/"> <img src="https://img.shields.io/badge/License-MIT-green.svg"></a>
-<a href="https://www.python.org/"><img src="https://img.shields.io/pypi/pyversions/XClientTransaction"></a>
-<a href="https://pypi.org/project/XClientTransaction"> <img src="https://img.shields.io/pypi/v/XClientTransaction"></a>
-<a href="https://github.com/iSarabjitDhiman/XClientTransaction/commits"> <img src="https://img.shields.io/github/last-commit/iSarabjitDhiman/XClientTransaction"></a>
-<a href="https://pypi.org/project/XClientTransaction/"> <img src="https://img.shields.io/pypi/dd/XClientTransaction"></a>
-<a href="https://discord.gg/pHY6CU5Ke4"> <img alt="Discord" src="https://img.shields.io/discord/1149281691479851018?style=flat&logo=discord&logoColor=white"></a>
-<a href="https://twitter.com/isarabjitdhiman"> <img src="https://img.shields.io/twitter/follow/iSarabjitDhiman?style=social"></a>
+<a href="https://www.npmjs.com/package/xclienttransaction"><img src="https://img.shields.io/npm/v/xclienttransaction"></a>
+<a href="https://bundlephobia.com/package/xclienttransaction"><img src="https://img.shields.io/bundlephobia/minzip/xclienttransaction"></a>
+<a href="https://github.com/swyxio/XClientTransactionJS/commits/main"> <img src="https://img.shields.io/github/last-commit/swyxio/XClientTransactionJS"></a>
 
-Reference :
+> [!NOTE]
+> This is a JavaScript port of the original [Python implementation](https://github.com/iSarabjitDhiman/XClientTransaction).
+> The Python version may be more actively maintained and include additional features.
+
+## Authors
+
+- Original Python Implementation: [@iSarabjitDhiman](https://www.github.com/iSarabjitDhiman)
+- JavaScript Port: [@swyxio](https://www.github.com/swyxio)
+
+## License
+
+MIT 2025 Sarabjit Dhiman, Shawn Wang
+
+## References
 
 - [Twitter Header: Part 1, Deobfuscation](https://antibot.blog/posts/1741552025433)
 - [Twitter Header: Part 2, Reverse Engineering](https://antibot.blog/posts/1741552092462)
 - [Twitter Header: Part 3, Generating the header](https://antibot.blog/posts/1741552163416)
+- [Original Python Implementation](https://github.com/iSarabjitDhiman/XClientTransaction)
 
 ## Installation
 
-### Python Package
+### NPM Package
 
 ```bash
-pip install XClientTransaction -U --no-cache-dir
+npm install xclienttransaction
 ```
 
 ### From Source
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/XClientTransactionJS.git
+   git clone https://github.com/swyxio/XClientTransactionJS.git
    cd XClientTransactionJS
    ```
 
@@ -46,21 +57,50 @@ pip install XClientTransaction -U --no-cache-dir
 
 The browser-compatible library will be available at `dist/xclienttransaction.js`
 
-## Python Usage
+## JavaScript Usage
 
-```python
-python quickstart.py
+### In Node.js
+
+```javascript
+import { ClientTransaction } from 'xclienttransaction';
+// or using CommonJS:
+// const { ClientTransaction } = require('xclienttransaction');
+
+// Initialize with the HTML from x.com and its ondemand script
+const ct = new ClientTransaction(homeHtml, ondemandJs);
+const transactionId = ct.generateTransactionId('GET', '/api/endpoint');
+console.log(transactionId);
+```
+
+### In the Browser
+
+```html
+<script src="https://unpkg.com/xclienttransaction/dist/xclienttransaction.js"></script>
+<script>
+  // homeHtml and ondemandJs should contain the raw page source
+  // from https://x.com and its ondemand script
+  const ct = new XClientTransaction.ClientTransaction(homeHtml, ondemandJs);
+  console.log(ct.generateTransactionId('GET', '/test'));
+</script>
 ```
 
 ## How It Works
 
-The library generates a transaction ID by:
+This library generates the `X-Client-Transaction-Id` header required by Twitter/X's API. The process involves:
 
-1. Extracting animation data from the home page HTML
-2. Parsing key byte indices from the on-demand JavaScript file
-3. Combining these with the request method and path
+1. Extracting animation data from the X/Twitter home page HTML
+2. Parsing key byte indices from an on-demand JavaScript file
+3. Combining these with the HTTP method and path of your API request
 4. Generating a cryptographic signature
 5. Encoding everything into a Base64 string
+
+### Key Differences from Python Version
+
+- **Browser Support**: This version works in both Node.js and browser environments
+- **Dependencies**: Uses `js-sha256` for hashing instead of Python's `hashlib`
+- **Performance**: The JavaScript implementation is generally faster for web applications
+- **Bundle Size**: ~33KB minified (browser bundle)
+- **API**: Similar API but adapted to JavaScript conventions
 
 ### Response Formats
 
@@ -161,143 +201,58 @@ When using Node.js you can import the ES module directly:
 import { ClientTransaction } from './js_client_transaction/index.js';
 ```
 
-### Fetching `homeHtml` and `ondemandJs`
+## Fetching Required Data
 
-In both environments you must retrieve the HTML for `https://x.com` and the
-`ondemand.s.*.js` file referenced in that page. Examples for Node.js and the
-browser are shown below.
+To use this library, you need to fetch two pieces of data from X/Twitter:
 
-#### Node.js
+1. The HTML from `https://x.com`
+2. The `ondemand.s.*.js` file referenced in that HTML
+
+### In Node.js
 
 ```javascript
-import fetch from 'node-fetch'; // Node 18+ has global fetch
-import {
-  getOndemandFileUrl,
-  generateHeaders
-} from './js_client_transaction/utils.js';
+import { getOndemandFileUrl, generateHeaders } from 'xclienttransaction';
 
-const headers = generateHeaders();
-const homeHtml = await (await fetch('https://x.com', { headers })).text();
-const ondemandUrl = getOndemandFileUrl(homeHtml);
-const ondemandJs = await (await fetch(ondemandUrl, { headers })).text();
+async function fetchData() {
+  const headers = generateHeaders();
+  const homeHtml = await (await fetch('https://x.com', { headers })).text();
+  const ondemandUrl = getOndemandFileUrl(homeHtml);
+  const ondemandJs = await (await fetch(ondemandUrl, { headers })).text();
+  return { homeHtml, ondemandJs };
+}
 ```
 
-#### Browser
+### In the Browser
 
-```html
-<script type="module">
-  import {
-    getOndemandFileUrl,
-    generateHeaders
-  } from './js_client_transaction/utils.js';
+```javascript
+import { getOndemandFileUrl, generateHeaders } from 'xclienttransaction';
 
+async function fetchData() {
+  // Note: You may need to handle CORS when fetching from a browser
   const headers = new Headers(generateHeaders());
   const homeHtml = await (await fetch('https://x.com', { headers })).text();
   const ondemandUrl = getOndemandFileUrl(homeHtml);
-  const ondemandJs = await (await fetch(ondemandUrl)).text();
-  // Use these values when constructing ClientTransaction
-</script>
+  const ondemandJs = await (await fetch(ondemandUrl, { headers })).text();
+  return { homeHtml, ondemandJs };
+}
 ```
+
+> **Note**: When running in a browser, you may encounter CORS restrictions. You might need to use a proxy or CORS-anywhere service for production use.
 
 Direct browser requests may be blocked by CORS. Consider proxying the requests
 through a server if needed.
 
 ## Get x.com Home Page and ondemand.s File Response
 
-#### Synchronous Version
+#### Python Version
 
-```python
-import bs4
-import requests
-from x_client_transaction.utils import generate_headers, handle_x_migration, get_ondemand_file_url
+For the original Python implementation, please see the [XClientTransaction](https://github.com/iSarabjitDhiman/XClientTransaction) repository. The Python version includes additional features like automatic response handling and may be more actively maintained.
 
-# INITIALIZE SESSION
-session = requests.Session()
-session.headers = generate_headers()
+## Publishihg
 
-
-# GET HOME PAGE RESPONSE
-# required only when hitting twitter.com but not x.com
-# returns bs4.BeautifulSoup object
-home_page_response = handle_x_migration(session=session)
-
-# for x.com no migration is required, just simply do
-home_page = session.get(url="https://x.com")
-home_page_response = bs4.BeautifulSoup(home_page.content, 'html.parser')
-
-
-# GET ondemand.s FILE RESPONSE
-ondemand_file_url = get_ondemand_file_url(response=home_page_response)
-ondemand_file = session.get(url=ondemand_file_url)
-ondemand_file_response = bs4.BeautifulSoup(ondemand_file.content, 'html.parser')
+```bash
+# npm login # if needed
+npm version patch && npm publish --access public
+npm version minor && npm publish --access public
+npm version major && npm publish --access public
 ```
-
-#### Async Version
-
-```python
-import bs4
-import httpx
-from x_client_transaction.utils import generate_headers, handle_x_migration_async, get_ondemand_file_url
-
-# INITIALIZE SESSION
-session = httpx.AsyncClient(headers=generate_headers())
-
-
-# GET HOME PAGE RESPONSE
-# required only when hitting twitter.com but not x.com
-# returns bs4.BeautifulSoup object
-home_page_response = await handle_x_migration_async(session=session)
-
-# for x.com no migration is required, just simply do
-home_page = await session.get(url="https://x.com")
-home_page_response = bs4.BeautifulSoup(home_page.content, 'html.parser')
-
-
-# GET ondemand.s FILE RESPONSE
-ondemand_file_url = get_ondemand_file_url(response=home_page_response)
-ondemand_file = await session.get(url=ondemand_file_url)
-ondemand_file_response = bs4.BeautifulSoup(ondemand_file.content, 'html.parser')
-```
-
-## Generate X-Client-Transaction-I (tid):
-
-```python
-from urllib.parse import urlparse
-from x_client_transaction import ClientTransaction
-
-
-# Example 1
-# replace the url and http method as per your use case
-url = "https://x.com/i/api/1.1/jot/client_event.json"
-method = "POST"
-path = urlparse(url=url).path
-# path will be /i/api/1.1/jot/client_event.json in this case
-
-# Example 2
-user_by_screen_name_url = "https://x.com/i/api/graphql/1VOOyvKkiI3FMmkeDNxM9A/UserByScreenName"
-user_by_screen_name_http_method = "GET"
-user_by_screen_name_path = urlparse(url=url).path
-# path will be /i/api/graphql/1VOOyvKkiI3FMmkeDNxM9A/UserByScreenName in this case
-
-
-ct = ClientTransaction(home_page_response=home_page_response, ondemand_file_response=ondemand_file_response)
-transaction_id = ct.generate_transaction_id(method=method, path=path)
-transaction_id_for_user_by_screen_name_endpoint = ct.generate_transaction_id(
-    method=user_by_screen_name_http_method, path=user_by_screen_name_path)
-
-print(transaction_id)
-print(transaction_id_for_user_by_screen_name_endpoint)
-
-```
-
-## Authors
-
-- [@iSarabjitDhiman](https://www.github.com/iSarabjitDhiman)
-
-## Feedback
-
-If you have any feedback, please reach out to us at hello@sarabjitdhiman.com or contact me on Social Media @iSarabjitDhiman
-
-## Support
-
-For support, email hello@sarabjitdhiman.com

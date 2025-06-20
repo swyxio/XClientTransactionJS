@@ -1,16 +1,43 @@
 {
-  "name": "xclienttransactionjs",
-  "version": "1.0.0",
-  "description": "<h1 align=\"center\">X-Client-Transaction-ID</h1>",
+  "name": "xclienttransaction",
+  "version": "0.0.1",
+  "description": "Generate Twitter/X Client-Transaction-ID header in JavaScript (Node & browser)",
   "main": "js_client_transaction/index.js",
   "type": "module",
-  "scripts": {
-    "test": "echo \"Error: no JS tests yet\"",
-    "build": "esbuild js_client_transaction/index.js --bundle --format=iife --global-name=XClientTransaction --outfile=dist/xclienttransaction.js"
+  "browser": "dist/xclienttransaction.js",
+  "exports": {
+    ".": {
+      "import": "./js_client_transaction/index.js",
+      "require": "./dist/xclienttransaction.js"
+    }
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "files": [
+    "js_client_transaction",
+    "dist"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no JS tests yet\" && exit 0",
+    "build": "esbuild js_client_transaction/index.js --bundle --format=iife --global-name=XClientTransaction --outfile=dist/xclienttransaction.js",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "twitter",
+    "x",
+    "client-transaction",
+    "tid",
+    "header",
+    "api"
+  ],
+  "author": "swyxio",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/swyxio/XClientTransactionJS.git"
+  },
+  "bugs": {
+    "url": "https://github.com/swyxio/XClientTransactionJS/issues"
+  },
+  "homepage": "https://github.com/swyxio/XClientTransactionJS#readme",
   "devDependencies": {
     "esbuild": "^0.25.5"
   },
