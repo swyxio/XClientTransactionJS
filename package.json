@@ -1,6 +1,6 @@
 {
   "name": "xclienttransaction",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Generate Twitter/X Client-Transaction-ID header in JavaScript (Node & browser)",
   "main": "js_client_transaction/index.js",
   "type": "module",
