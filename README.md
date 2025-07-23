@@ -84,6 +84,8 @@ console.log(transactionId);
 </script>
 ```
 
+note that under many situations domains the fetches done within XClientTransaction will run into CORS errors unless you have the ability to disable CORS.
+
 ## How It Works
 
 This library generates the `X-Client-Transaction-Id` header required by Twitter/X's API. The process involves:
